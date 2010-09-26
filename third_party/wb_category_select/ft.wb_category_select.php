@@ -54,7 +54,11 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$category_group_settings = $data['category_groups'];
 		foreach ($category_groups->result_array() as $index => $row) {
 			// Determine checked or not
-			$checked = (is_numeric(array_search($row['group_id'], $category_group_settings))) ? TRUE : FALSE;
+			$checked = (
+							is_array($category_group_settings) 
+							AND is_numeric(array_search($row['group_id'], $category_group_settings))
+						) ?
+						TRUE : FALSE;
 			
 			// Build checkbox
 			$checkboxes .= "<p><label>";
