@@ -20,6 +20,8 @@ Field Options
 Change Log
 ----------
 
+- 1.1
+	- Added Matrix compatibility
 - 1.0.1
 	- Fixed a warning when no previous settings existed for the field
 - 1.0.0
