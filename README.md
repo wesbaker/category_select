@@ -20,6 +20,8 @@ Field Options
 Change Log
 ----------
 
+- 1.1.2
+	- Rewrote display field function to cut down on duplication
 - 1.1.1
 	- Fixed a problem with Matrix compatibility
 - 1.1

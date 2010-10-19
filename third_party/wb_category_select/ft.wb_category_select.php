@@ -129,14 +129,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 * @param Array $data Field data
 	 */
 	function display_field($data)
-	{		
-		// Figure out site, field_name and field_id
-		$field_id = str_replace(array('[', ']'), array('_', ''), $this->field_name);
-		
-		// Build options array
-		$options = $this->_build_category_list($this->settings);
-		
-		return form_dropdown($this->field_name, $options, $data, 'id="'.$field_id.'"');
+	{
+		return $this->_build_field($data, FALSE);
 	}
 	
 	/**
@@ -145,13 +139,28 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	public function display_cell($data)
 	{
-		// Figure out site, field_name and field_id
-		$field_id = str_replace(array('[', ']'), array('_', ''), $this->cell_name);
-
-		// Build options array
-		$options = $this->_build_category_list($this->settings['wb_category_select']);
+		return $this->_build_field($data, TRUE);
+	}
+	
+	/**
+	 * Builds the field
+	 * @param Array $data Field data
+	 * @param Boolean $cell TRUE if the field is for a Matrix Cell, FALSE otherwise
+	 * @return String The dropdown for the category select
+	 */
+	private function _build_field($data, $cell = FALSE)
+	{
+		// Figure out field_name and field_id
+		$field_name = $cell ? $this->cell_name : $this->field_name;
+		$field_id = str_replace(array('[', ']'), array('_', ''), $field_name);
 		
-		return form_dropdown($this->cell_name, $options, $data, 'id="'.$field_id.'"');
+		// Establish Settings
+		$settings = $cell ? $this->settings['wb_category_select'] : $this->settings;
+		
+		// Build options array
+		$options = $this->_build_category_list($settings);
+		
+		return form_dropdown($field_name, $options, $data, 'id="'.$field_id.'"');
 	}
 	
 	/**
