@@ -146,12 +146,12 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	public function display_cell($data)
 	{
 		// Figure out site, field_name and field_id
-		$field_id = str_replace(array('[', ']'), array('_', ''), $this->field_name);
+		$field_id = str_replace(array('[', ']'), array('_', ''), $this->cell_name);
 
 		// Build options array
 		$options = $this->_build_category_list($this->settings['wb_category_select']);
 		
-		return form_dropdown($this->field_name, $options, $data, 'id="'.$field_id.'"');
+		return form_dropdown($this->cell_name, $options, $data, 'id="'.$field_id.'"');
 	}
 	
 	/**
