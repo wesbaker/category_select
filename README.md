@@ -20,6 +20,8 @@ Field Options
 Change Log
 ----------
 
+- 1.1.3
+	- Fixed a settings problem with the Matrix Cell
 - 1.1.2
 	- Rewrote display field function to cut down on duplication
 - 1.1.1
