@@ -92,8 +92,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$checked = (
 							is_array($category_group_settings) 
 							AND is_numeric(array_search($row['group_id'], $category_group_settings))
-						) ?
-						TRUE : FALSE;
+						) ? TRUE : FALSE;
 			
 			// Build checkbox
 			$checkboxes .= "<p><label>";
@@ -171,16 +170,20 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	private function _build_category_list($settings)
 	{
-		$options = array();
+		$options = array("" => "");
 		$site_id = $this->EE->config->item('site_id');
 		
 		foreach ($settings['category_groups'] as $category_group_id) {
 			// Get Category Group Name for optgroups
 			$category_group_name = $this->EE->db->select('group_name')->get_where('category_groups', array('group_id' => $category_group_id))->result_array();
+			
+			// If this isn't an array skip this item in the for loop
+			if ( ! is_array($category_group_name) OR empty($category_group_name)) { continue; }
+			
 			$category_group_name = $category_group_name[0]['group_name'];
 			
 			// Get Categories based on Category Group
-			$categories = $this->EE->db->select('cat_id, cat_name')->get_where('categories', array("site_id" => $site_id, "group_id" => $category_group_id));
+			$categories = $this->EE->db->select('cat_id, cat_name')->order_by('cat_name')->get_where('categories', array("site_id" => $site_id, "group_id" => $category_group_id));
 			$options_inner = array();
 			foreach ($categories->result_array() as $index => $category) {
 				$options_inner[$category['cat_id']] = $category['cat_name'];

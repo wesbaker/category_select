@@ -20,6 +20,9 @@ Field Options
 Change Log
 ----------
 
+- 1.1.5
+	- Added check for invalid category groups
+	- Sorting the category name list on a per category group basis
 - 1.1.4
 	- Removed duplicated code from fieldtype
 - 1.1.3
