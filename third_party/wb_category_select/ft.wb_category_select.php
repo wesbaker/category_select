@@ -15,6 +15,9 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		'version' => WB_CAT_SELECT_VER
 	);
 
+	// enable tag pairs
+	var $has_array_data = TRUE;
+
 	/**
 	 * Fieldtype Constructor
 	 */
@@ -32,12 +35,19 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function display_settings($data)
 	{
 		$data = $this->_default_settings($data);
-		$checkboxes = $this->_build_category_checkboxes($data);
 		
 		$this->EE->lang->loadfile('wb_category_select');
+
+		// Categories
 		$this->EE->table->add_row(
 			lang('wb_category_select_groups', 'wb_category_select_groups'),
-			$checkboxes
+			$this->_build_category_checkboxes($data)
+		);
+
+		// Multiple?
+		$this->EE->table->add_row(
+			lang('wb_category_select_multi', 'wb_category_select_multi'),
+			$this->_build_multi_radios($data)
 		);
 	}
 
@@ -50,11 +60,21 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		$settings = (isset($data['wb_category_select'])) ? $data['wb_category_select'] : array();
 		$settings = $this->_default_settings($settings);
-		$checkboxes = $this->_build_category_checkboxes($settings);
 		
 		$this->EE->lang->loadfile('wb_category_select');
+
 		return array(
-			array(lang('wb_category_select_groups'), $checkboxes)
+			// Categories
+			array(
+				lang('wb_category_select_groups'),
+				$this->_build_category_checkboxes($settings)
+			),
+
+			// Multiple?
+			array(
+				lang('wb_category_select_multi'),
+				$this->_build_multi_radios($settings)
+			)
 		);
 	}
 	
@@ -67,7 +87,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		return array_merge(
 			array(
-				'category_groups'  => array()
+				'category_groups'  => array(),
+				'multi' => 'n'
 			),
 			(array) $data
 		);
@@ -102,6 +123,17 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 		
 		return $checkboxes;
+	}
+
+	/**
+	 * Builds a string of yes/no radio buttons
+	 */
+	private function _build_multi_radios($data)
+	{
+		return form_radio('wb_category_select[multi]', 'y', ($data['multi'] == 'y'), 'id="wb_category_select_multi_y"') . NL
+			. lang('yes', 'wb_category_select_multi_y') . NBS.NBS.NBS.NBS.NBS . NL
+			. form_radio('wb_category_select[multi]', 'n', ($data['multi'] == 'n'), 'id="wb_category_select_multi_n"') . NL
+			. lang('no', 'wb_category_select_multi_n');
 	}
 
 	// Save Settings --------------------------------------------------------------------
@@ -150,16 +182,22 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	private function _build_field($data, $cell = FALSE)
 	{
+		// Establish Settings
+		$settings = $cell ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = $this->_default_settings($settings);
+		
 		// Figure out field_name and field_id
 		$field_name = $cell ? $this->cell_name : $this->field_name;
 		$field_id = str_replace(array('[', ']'), array('_', ''), $field_name);
 		
-		// Establish Settings
-		$settings = $cell ? $this->settings['wb_category_select'] : $this->settings;
-		
 		// Build options array
 		$options = $this->_build_category_list($settings);
 		
+		if ($settings['multi'] == 'y') {
+			if (is_string($data)) $data = explode("\n", $data);
+			return form_multiselect($field_name.'[]', $options, $data, 'id="'.$field_id.'"');
+		}
+
 		return form_dropdown($field_name, $options, $data, 'id="'.$field_id.'"');
 	}
 	
@@ -170,7 +208,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	private function _build_category_list($settings)
 	{
-		$options = array("" => "");
+		$options = $settings['multi'] == 'y' ? array() : array('' => '');
 		$site_id = $this->EE->config->item('site_id');
 		
 		foreach ($settings['category_groups'] as $category_group_id) {
@@ -193,4 +231,90 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		
 		return $options;
 	}
+
+	// Save Field --------------------------------------------------------------------
+
+	/**
+	 * Save Field
+	 */
+	function save($data)
+	{
+		// flatten array if multiple selections are allowed
+		if (is_array($data)) {
+			$data = implode("\n", $data);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Save Cell
+	 */
+	function save_cell($data)
+	{
+		return $this->save($data);
+	}
+
+	// Tags --------------------------------------------------------------------
+
+	/**
+	 * Pre-process
+	 *
+	 * If multiple selections are allowed, this will turn the string of
+	 * category IDs into an array.
+	 */
+	function pre_process($data)
+	{
+		// Establish Settings
+		$settings = isset($this->settings['wb_category_select']) ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = $this->_default_settings($settings);
+
+		// if multiple selections aren't allowed, just return the cat ID
+		if ($settings['multi'] != 'y') return $data;
+
+		$data = explode("\n", $data);
+
+		foreach ($data as &$cat)
+		{
+			$cat = array('category_id' => $cat);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Replace Tag
+	 *
+	 * If only a single category selection is allowed, this will just return
+	 * the selected category ID. Otherwise, it'll loop through the tag pair,
+	 * parsing the {category_id} single variable tags.
+	 */
+	function replace_tag($data, $params = array(), $tagdata = FALSE)
+	{
+		// Establish Settings
+		$settings = isset($this->settings['wb_category_select']) ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = $this->_default_settings($settings);
+
+		// if multiple selections aren't allowed, just return the cat ID
+		if ($settings['multi'] != 'y') return $data;
+
+		// ignore if no inner tagdata
+		if (! $tagdata) return;
+
+		// pre_process() fallback for Matrix
+		if (is_string($data)) $data = $this->pre_process($data);
+
+		// loop through the tag pair for each selected category,
+		// parsing the {category_id} tags
+		$r = $this->EE->TMPL->parse_variables($tagdata, $data);
+
+		// backspace= param
+		if (isset($params['backspace']) && $params['backspace'])
+		{
+			$r = substr($r, 0, -$params['backspace']);
+		}
+
+		return $r;
+	}
+
 }
