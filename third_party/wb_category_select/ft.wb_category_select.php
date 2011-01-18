@@ -183,11 +183,11 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	private function _build_field($data, $cell = FALSE)
 	{
 		// Establish Settings
-		$settings = $cell ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = ($cell) ? $this->settings['wb_category_select'] : $this->settings;
 		$settings = $this->_default_settings($settings);
 		
 		// Figure out field_name and field_id
-		$field_name = $cell ? $this->cell_name : $this->field_name;
+		$field_name = ($cell) ? $this->cell_name : $this->field_name;
 		$field_id = str_replace(array('[', ']'), array('_', ''), $field_name);
 		
 		// Build options array
@@ -208,7 +208,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	private function _build_category_list($settings)
 	{
-		$options = $settings['multi'] == 'y' ? array() : array('' => '');
+		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
 		$site_id = $this->EE->config->item('site_id');
 		
 		foreach ($settings['category_groups'] as $category_group_id) {
@@ -266,7 +266,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function pre_process($data)
 	{
 		// Establish Settings
-		$settings = isset($this->settings['wb_category_select']) ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = (isset($this->settings['wb_category_select'])) ? $this->settings['wb_category_select'] : $this->settings;
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
@@ -292,29 +292,29 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function replace_tag($data, $params = array(), $tagdata = FALSE)
 	{
 		// Establish Settings
-		$settings = isset($this->settings['wb_category_select']) ? $this->settings['wb_category_select'] : $this->settings;
+		$settings = (isset($this->settings['wb_category_select'])) ? $this->settings['wb_category_select'] : $this->settings;
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') return $data;
+		if ($settings['multi'] != 'y') { return $data; }
 
 		// ignore if no inner tagdata
-		if (! $tagdata) return;
+		if ( ! $tagdata) { return; }
 
 		// pre_process() fallback for Matrix
-		if (is_string($data)) $data = $this->pre_process($data);
+		if (is_string($data)) { $data = $this->pre_process($data); }
 
 		// loop through the tag pair for each selected category,
 		// parsing the {category_id} tags
-		$r = $this->EE->TMPL->parse_variables($tagdata, $data);
+		$parsed = $this->EE->TMPL->parse_variables($tagdata, $data);
 
 		// backspace= param
 		if (isset($params['backspace']) && $params['backspace'])
 		{
-			$r = substr($r, 0, -$params['backspace']);
+			$parsed = substr($r, 0, -$params['backspace']);
 		}
 
-		return $r;
+		return $parsed;
 	}
 
 }
