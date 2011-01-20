@@ -297,13 +297,22 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 		// if multiple selections aren't allowed, just return the cat ID
 		if ($settings['multi'] != 'y') { return $data; }
-
-		// ignore if no inner tagdata
-		if ( ! $tagdata) { return; }
-
+		
+		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
+		if ($tagdata === FALSE) {
+			$categories = array();
+			
+			foreach ($data as $array) 
+			{
+				$categories[] = $array['category_id'];
+			}
+			
+			return implode('|', $categories);
+		}
+		
 		// pre_process() fallback for Matrix
 		if (is_string($data)) { $data = $this->pre_process($data); }
-
+		
 		// loop through the tag pair for each selected category,
 		// parsing the {category_id} tags
 		$parsed = $this->EE->TMPL->parse_variables($tagdata, $data);
@@ -311,7 +320,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		// backspace= param
 		if (isset($params['backspace']) && $params['backspace'])
 		{
-			$parsed = substr($r, 0, -$params['backspace']);
+			$parsed = substr($parsed, 0, -$params['backspace']);
 		}
 
 		return $parsed;

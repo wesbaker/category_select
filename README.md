@@ -1,7 +1,7 @@
 WB Category Select
 ==================
 
-- Dropdown field that shows a list of pre-defined category groups and the categories within them
+Select (dropdown or multiselect) field that shows a list of pre-defined category groups and the categories within them
 
 
 Install
@@ -15,6 +15,8 @@ Field Options
 -------------
 
 - Category Groups - Select the field groups you want to show up in the drop down field
+- Allow multiple selections? - Changes the field from a dropdown to a multiselect
+	- When using multiple selections, you can either use a tag pair and use `{category_id}` within that or just use a single tag to get a pipe delimited list of the category IDs
 
 
 Change Log
