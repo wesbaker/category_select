@@ -193,7 +193,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		// Build options array
 		$options = $this->_build_category_list($settings);
 		
-		if ($settings['multi'] == 'y') {
+		if ($settings['multi'] == 'y') 
+		{
 			if (is_string($data)) $data = explode("\n", $data);
 			return form_multiselect($field_name.'[]', $options, $data, 'id="'.$field_id.'"');
 		}
@@ -211,22 +212,19 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
 		$site_id = $this->EE->config->item('site_id');
 		
-		foreach ($settings['category_groups'] as $category_group_id) {
-			// Get Category Group Name for optgroups
-			$category_group_name = $this->EE->db->select('group_name')->get_where('category_groups', array('group_id' => $category_group_id))->result_array();
-			
-			// If this isn't an array skip this item in the for loop
-			if ( ! is_array($category_group_name) OR empty($category_group_name)) { continue; }
-			
-			$category_group_name = $category_group_name[0]['group_name'];
-			
+		foreach ($settings['category_groups'] as $category_group_id) 
+		{
 			// Get Categories based on Category Group
-			$categories = $this->EE->db->select('cat_id, cat_name')->order_by('cat_name')->get_where('categories', array("site_id" => $site_id, "group_id" => $category_group_id));
-			$options_inner = array();
-			foreach ($categories->result_array() as $index => $category) {
-				$options_inner[$category['cat_id']] = $category['cat_name'];
+			$this->EE->load->library('api');
+			$this->EE->api->instantiate('channel_categories');
+			
+			$categories = $this->EE->api_channel_categories->category_tree($category_group_id);
+			
+			foreach ($categories as $cat_id => $cat_data) 
+			{
+				$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
+				$options[$cat_data[3]][] = $prefix.$cat_data[1];
 			}
-			$options["$category_group_name"] = $options_inner;
 		}
 		
 		return $options;
@@ -240,7 +238,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function save($data)
 	{
 		// flatten array if multiple selections are allowed
-		if (is_array($data)) {
+		if (is_array($data)) 
+		{
 			$data = implode("\n", $data);
 		}
 
@@ -270,7 +269,10 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') return $data;
+		if ($settings['multi'] != 'y') 
+		{
+			return $data;
+		}
 
 		$data = explode("\n", $data);
 
@@ -296,10 +298,14 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') { return $data; }
+		if ($settings['multi'] != 'y') 
+		{
+			return $data;
+		}
 		
 		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
-		if ($tagdata === FALSE) {
+		if ($tagdata === FALSE)
+		{
 			$categories = array();
 			
 			foreach ($data as $array) 
@@ -311,7 +317,10 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 		
 		// pre_process() fallback for Matrix
-		if (is_string($data)) { $data = $this->pre_process($data); }
+		if (is_string($data)) 
+		{ 
+			$data = $this->pre_process($data); 
+		}
 		
 		// loop through the tag pair for each selected category,
 		// parsing the {category_id} tags

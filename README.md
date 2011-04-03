@@ -22,6 +22,8 @@ Field Options
 Change Log
 ----------
 
+- 1.3
+	- Category lists now show when a category is nested
 - 1.2
 	- Added option for multiple categories select (thanks to Brandon Kelly)
 - 1.1.5
