@@ -223,7 +223,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			foreach ($categories as $cat_id => $cat_data) 
 			{
 				$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
-				$options[$cat_data[3]][] = $prefix.$cat_data[1];
+				$options[$cat_data[3]][$cat_id] = $prefix.$cat_data[1];
 			}
 		}
 		
