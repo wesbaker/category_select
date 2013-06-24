@@ -18,14 +18,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	// enable tag pairs
 	var $has_array_data = TRUE;
 
-	/**
-	 * Fieldtype Constructor
-	 */
-	function Wb_category_select_ft()
-	{
-		parent::EE_Fieldtype();
-	}
-
 	// Settings --------------------------------------------------------------------
 
 	/**
