@@ -296,7 +296,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 		
 		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
-		if ($tagdata === FALSE)
+		if (!$tagdata)
 		{
 			$categories = array();
 			
