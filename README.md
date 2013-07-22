@@ -22,6 +22,8 @@ Field Options
 Change Log
 ----------
 
+- 1.3.3
+	- Loosened up the $tagdata check when using the tag
 - 1.3.2
 	- Removed unneeded constructor that was also causing deprecation notices
 - 1.3
