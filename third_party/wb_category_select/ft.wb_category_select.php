@@ -27,7 +27,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function display_settings($data)
 	{
 		$data = $this->_default_settings($data);
-		
+
 		$this->EE->lang->loadfile('wb_category_select');
 
 		// Categories
@@ -52,7 +52,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		$settings = (isset($data['wb_category_select'])) ? $data['wb_category_select'] : array();
 		$settings = $this->_default_settings($settings);
-		
+
 		$this->EE->lang->loadfile('wb_category_select');
 
 		return array(
@@ -69,7 +69,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			)
 		);
 	}
-	
+
 	/**
 	 * Builds the default settings
 	 * @param Array $data Data array from display_settings or display_cell_settings
@@ -85,7 +85,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			(array) $data
 		);
 	}
-	
+
 	/**
 	 * Builds a string of category checkboxes
 	 * @param Array $data Data array from display_settings or display_cell_settings
@@ -96,24 +96,24 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		// Get list of category groups
 		$site_id = $this->EE->config->item('site_id');
 		$category_groups = $this->EE->db->select("group_id, group_name")->get_where('category_groups', array("site_id" => $site_id));
-		
+
 		// Build checkbox list
 		$checkboxes = '';
 		$category_group_settings = $data['category_groups'];
 		foreach ($category_groups->result_array() as $index => $row) {
 			// Determine checked or not
 			$checked = (
-							is_array($category_group_settings) 
+							is_array($category_group_settings)
 							AND is_numeric(array_search($row['group_id'], $category_group_settings))
 						) ? TRUE : FALSE;
-			
+
 			// Build checkbox
 			$checkboxes .= "<p><label>";
 			$checkboxes .= form_checkbox('wb_category_select[category_groups][]', $row["group_id"], $checked);
 			$checkboxes .= " " . $row['group_name'];
 			$checkboxes .= "</label></p>";
 		}
-		
+
 		return $checkboxes;
 	}
 
@@ -139,7 +139,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$this->EE->input->post('wb_category_select'),
 			$settings
 		);
-		
+
 		$settings['field_show_fmt'] = 'n';
 		$settings['field_type'] = 'wb_category_select';
 
@@ -156,7 +156,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		return $this->_build_field($data, FALSE);
 	}
-	
+
 	/**
 	 * Display Matrix Cell
 	 * @param Array $data Cell data
@@ -165,7 +165,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		return $this->_build_field($data, TRUE);
 	}
-	
+
 	/**
 	 * Builds the field
 	 * @param Array $data Field data
@@ -177,15 +177,15 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		// Establish Settings
 		$settings = ($cell) ? $this->settings['wb_category_select'] : $this->settings;
 		$settings = $this->_default_settings($settings);
-		
+
 		// Figure out field_name and field_id
 		$field_name = ($cell) ? $this->cell_name : $this->field_name;
 		$field_id = str_replace(array('[', ']'), array('_', ''), $field_name);
-		
+
 		// Build options array
 		$options = $this->_build_category_list($settings);
-		
-		if ($settings['multi'] == 'y') 
+
+		if ($settings['multi'] == 'y')
 		{
 			if (is_string($data)) $data = explode("\n", $data);
 			return form_multiselect($field_name.'[]', $options, $data, 'id="'.$field_id.'"');
@@ -193,7 +193,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 		return form_dropdown($field_name, $options, $data, 'id="'.$field_id.'"');
 	}
-	
+
 	/**
 	 * Build the list of categories given a settings object that contains category groups
 	 * @param Object $settings Settings Object for the field. If passing in matrix cell settings, only send the field's settings (e.g. $this->settings['field_name'])
@@ -203,22 +203,22 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
 		$site_id = $this->EE->config->item('site_id');
-		
-		foreach ($settings['category_groups'] as $category_group_id) 
+
+		foreach ($settings['category_groups'] as $category_group_id)
 		{
 			// Get Categories based on Category Group
 			$this->EE->load->library('api');
 			$this->EE->api->instantiate('channel_categories');
-			
+
 			$categories = $this->EE->api_channel_categories->category_tree($category_group_id);
-			
-			foreach ($categories as $cat_id => $cat_data) 
+
+			foreach ($categories as $cat_id => $cat_data)
 			{
 				$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
 				$options[$cat_data[3]][$cat_id] = $prefix.$cat_data[1];
 			}
 		}
-		
+
 		return $options;
 	}
 
@@ -230,7 +230,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	function save($data)
 	{
 		// flatten array if multiple selections are allowed
-		if (is_array($data)) 
+		if (is_array($data))
 		{
 			$data = implode("\n", $data);
 		}
@@ -261,19 +261,12 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') 
+		if ($settings['multi'] != 'y')
 		{
 			return $data;
 		}
 
-		$data = explode("\n", $data);
-
-		foreach ($data as &$cat)
-		{
-			$cat = array('category_id' => $cat);
-		}
-
-		return $data;
+		return (is_string($data)) ? explode("\n", $data) : $data;
 	}
 
 	/**
@@ -290,30 +283,30 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') 
+		if ($settings['multi'] != 'y')
 		{
 			return $data;
 		}
-		
+
 		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
 		if (empty($tagdata))
 		{
 			$categories = array();
-			
-			foreach ($data as $array) 
+
+			foreach ($data as $array)
 			{
 				$categories[] = $array['category_id'];
 			}
-			
+
 			return implode('|', $categories);
 		}
-		
+
 		// pre_process() fallback for Matrix
-		if (is_string($data)) 
-		{ 
-			$data = $this->pre_process($data); 
+		if (is_string($data))
+		{
+			$data = $this->pre_process($data);
 		}
-		
+
 		// loop through the tag pair for each selected category,
 		// parsing the {category_id} tags
 		$parsed = $this->EE->TMPL->parse_variables($tagdata, $data);

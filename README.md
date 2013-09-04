@@ -22,6 +22,8 @@ Field Options
 Change Log
 ----------
 
+- 1.3.4
+	- Fixed a bug where a warning would appear with Better Workflow.
 - 1.3.3
 	- Loosened up the $tagdata check when using the tag
 - 1.3.2
@@ -46,4 +48,4 @@ Change Log
 - 1.0.1
 	- Fixed a warning when no previous settings existed for the field
 - 1.0.0
-	- Initial Version of WB Category Select  
+	- Initial Version of WB Category Select
