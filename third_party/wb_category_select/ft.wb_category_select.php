@@ -246,6 +246,46 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		return $this->save($data);
 	}
 
+	/**
+	 * Insert actual categories
+	 */
+	function post_save($data)
+	{
+		$category_groups = $this->settings['category_groups'];
+		$entry_id = $this->settings['entry_id'];
+		$new_categories = explode("\n", $data);
+
+		// Grab all the categories from the category groups
+		$query = $this->EE->db->select('cat_id')
+								->from('categories')
+								->where_in('group_id', $category_groups)
+								->get();
+
+		foreach ($query->result_array() as $row)
+		{
+			$categories[] = $row['cat_id'];
+		}
+
+		$query->free_result();
+
+		// Delete any old categories
+		$this->EE->db->where('entry_id', $entry_id)
+						->where_in('cat_id', $categories)
+						->delete('category_posts');
+
+		// Prep the new categories to insert
+		foreach ($new_categories as $category)
+		{
+			$insert_data[] = array(
+				'entry_id' => $entry_id,
+				'cat_id' => $category
+			);
+		}
+
+		// Insert em
+		$this->EE->db->insert_batch('category_posts', $insert_data);
+	}
+
 	// Tags --------------------------------------------------------------------
 
 	/**
