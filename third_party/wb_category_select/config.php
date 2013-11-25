@@ -3,7 +3,7 @@
 if (! defined('WB_CAT_SELECT_NAME'))
 {
 	define('WB_CAT_SELECT_NAME', 'WB Category Select');
-	define('WB_CAT_SELECT_VER',  '1.3.4');
+	define('WB_CAT_SELECT_VER',  '1.3.5');
 }
 
 $config['name']    = WB_CAT_SELECT_NAME;
