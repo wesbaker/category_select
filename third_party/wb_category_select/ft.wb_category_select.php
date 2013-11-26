@@ -326,13 +326,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
 		if (empty($tagdata))
 		{
-			$categories = array();
-
-			foreach ($data as $array) {
-				$categories[] = $array['category_id'];
-			}
-
-			return implode('|', $categories);
+			return implode('|', $data);
 		}
 
 		// pre_process() fallback for Matrix
