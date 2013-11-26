@@ -1,6 +1,4 @@
-<?php if (!defined('BASEPATH')) {
-	exit('No direct script access allowed');
-}
+<?php if (!defined('BASEPATH')) { exit('No direct script access allowed'); }
 
 require_once PATH_THIRD . 'wb_category_select/config.php';
 
@@ -14,12 +12,12 @@ class Wb_category_select_ft extends EE_Fieldtype
 {
 
 	var $info = array(
-		'name' => WB_CAT_SELECT_NAME,
-		'version' => WB_CAT_SELECT_VER
+		'name'		=> WB_CAT_SELECT_NAME,
+		'version'	=> WB_CAT_SELECT_VER
 	);
 
 	// enable tag pairs
-	var $has_array_data = true;
+	var $has_array_data = TRUE;
 
 	/**
 	 * Fieldtype Constructor
@@ -42,14 +40,20 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$this->EE->lang->loadfile('wb_category_select');
 
 		// Categories
-		$this->EE->table->add_row(lang('wb_category_select_groups', 'wb_category_select_groups'),
-								  $this->_build_category_checkboxes($data));
+		$this->EE->table->add_row(
+			lang('wb_category_select_groups', 'wb_category_select_groups'),
+			$this->_build_category_checkboxes($data)
+		);
 
 		// Multiple?
-		$this->EE->table->add_row(lang('wb_category_select_multi', 'wb_category_select_multi'),
-								  $this->_build_multi_radios($data));
-		$this->EE->table->add_row(lang('wb_category_select_show_parents_only', 'wb_category_select_show_parents_only'),
-								  $this->_build_show_parents_only_radios($data));
+		$this->EE->table->add_row(
+			lang('wb_category_select_multi', 'wb_category_select_multi'),
+			$this->_build_radios($data)
+		);
+		$this->EE->table->add_row(
+			lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
+			$this->_build_radios($data, 'show_first_level_only')
+		);
 	}
 
 	/**
@@ -73,11 +77,11 @@ class Wb_category_select_ft extends EE_Fieldtype
 			// Multiple?
 			array(
 				lang('wb_category_select_multi'),
-				$this->_build_multi_radios($settings)
+				$this->_build_radios($settings)
 			),
 			array(
-				lang('wb_category_select_show_parents_only', 'wb_category_select_show_parents_only'),
-				$this->_build_show_parents_only_radios($settings)
+				lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
+				$this->_build_radios($settings, 'show_first_level_only')
 			),
 		);
 	}
@@ -89,11 +93,14 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	private function _default_settings($data)
 	{
-		return array_merge(array(
-								'category_groups' => array(),
-								'multi' => 'n',
-								'show_parents_only' => 'n'
-						   ), (array)$data);
+		return array_merge(
+			array(
+				'category_groups' => array(),
+				'multi' => 'n',
+				'show_first_level_only' => 'n'
+			),
+			(array) $data
+		);
 	}
 
 	/**
@@ -111,10 +118,11 @@ class Wb_category_select_ft extends EE_Fieldtype
 		// Build checkbox list
 		$checkboxes = '';
 		$category_group_settings = $data['category_groups'];
-		foreach ($category_groups->result_array() as $index => $row) {
+		foreach ($category_groups->result_array() as $index => $row)
+		{
 			// Determine checked or not
 			$checked = (is_array($category_group_settings)
-				AND is_numeric(array_search($row['group_id'], $category_group_settings))) ? true : false;
+				AND is_numeric(array_search($row['group_id'], $category_group_settings))) ? TRUE : FALSE;
 
 			// Build checkbox
 			$checkboxes .= "<p><label>";
@@ -129,24 +137,26 @@ class Wb_category_select_ft extends EE_Fieldtype
 	/**
 	 * Builds a string of yes/no radio buttons
 	 */
-	private function _build_multi_radios($data)
+	private function _build_radios($data, $name = 'multi')
 	{
-		return form_radio('wb_category_select[multi]', 'y', ($data['multi'] == 'y'),
-						  'id="wb_category_select_multi_y"') . NL . lang('yes',
-																		 'wb_category_select_multi_y') . NBS . NBS . NBS . NBS . NBS . NL . form_radio('wb_category_select[multi]',
-																																					   'n',
-			($data['multi'] == 'n'), 'id="wb_category_select_multi_n"') . NL . lang('no', 'wb_category_select_multi_n');
-	}
+		$radio_yes = form_radio(
+			"wb_category_select[{$name}]",
+			'y',
+			($data[$name] == 'y'),
+			"id='wb_category_select_{$name}_y'"
+		);
+		$radio_no = form_radio(
+			"wb_category_select[{$name}]",
+			'n',
+			($data[$name] == 'n'),
+			"id='wb_category_select_{$name}_n'"
+		);
 
-
-	private function _build_show_parents_only_radios($data)
-	{
-		return form_radio('wb_category_select[show_parents_only]', 'y', ($data['show_parents_only'] == 'y'),
-						  'id="wb_category_select_show_parents_only_y"') . NL . lang('yes',
-																					 'wb_category_select_show_parents_only_y') . NBS . NBS . NBS . NBS . NBS . NL . form_radio('wb_category_select[show_parents_only]',
-																																											   'n',
-			($data['show_parents_only'] == 'n'), 'id="wb_category_select_show_parents_only_n"') . NL . lang('no',
-																											'wb_category_select_show_parents_only_n');
+		return $radio_yes
+			. NL . lang('yes', "wb_category_select_{$name}_y")
+			. NBS . NBS . NBS . NBS . NBS . NL
+			. $radio_no
+			. NL . lang('no', "wb_category_select_{$name}_n");
 	}
 
 	// Save Settings --------------------------------------------------------------------
@@ -172,7 +182,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	function display_field($data)
 	{
-		return $this->_build_field($data, false);
+		return $this->_build_field($data, FALSE);
 	}
 
 	/**
@@ -181,7 +191,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	public function display_cell($data)
 	{
-		return $this->_build_field($data, true);
+		return $this->_build_field($data, TRUE);
 	}
 
 	/**
@@ -190,7 +200,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 * @param Boolean $cell TRUE if the field is for a Matrix Cell, FALSE otherwise
 	 * @return String The dropdown for the category select
 	 */
-	private function _build_field($data, $cell = false)
+	private function _build_field($data, $cell = FALSE)
 	{
 		// Establish Settings
 		$settings = ($cell) ? $this->settings['wb_category_select'] : $this->settings;
@@ -203,8 +213,10 @@ class Wb_category_select_ft extends EE_Fieldtype
 		// Build options array
 		$options = $this->_build_category_list($settings);
 
-		if ($settings['multi'] == 'y') {
-			if (is_string($data)) {
+		if ($settings['multi'] == 'y')
+		{
+			if (is_string($data))
+			{
 				$data = explode("\n", $data);
 			}
 
@@ -224,15 +236,18 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
 		$site_id = $this->EE->config->item('site_id');
 
-		foreach ($settings['category_groups'] as $category_group_id) {
+		foreach ($settings['category_groups'] as $category_group_id)
+		{
 			// Get Categories based on Category Group
 			$this->EE->load->library('api');
 			$this->EE->api->instantiate('channel_categories');
 
 			$categories = $this->EE->api_channel_categories->category_tree($category_group_id);
 
-			foreach ($categories as $cat_id => $cat_data) {
-				if ($settings['show_parents_only'] == 'n' || ($settings['show_parents_only'] == 'y' && $cat_data[5] == 1)) {
+			foreach ($categories as $cat_id => $cat_data)
+			{
+				if ($settings['show_first_level_only'] == 'n' || ($settings['show_first_level_only'] == 'y' && $cat_data[5] == 1))
+				{
 					$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
 					$options[$cat_data[3]][$cat_id] = $prefix . $cat_data[1];
 				}
@@ -250,7 +265,8 @@ class Wb_category_select_ft extends EE_Fieldtype
 	function save($data)
 	{
 		// flatten array if multiple selections are allowed
-		if (is_array($data)) {
+		if (is_array($data))
+		{
 			$data = implode("\n", $data);
 		}
 
@@ -280,7 +296,8 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') {
+		if ($settings['multi'] != 'y')
+		{
 			return $data;
 		}
 
@@ -301,12 +318,14 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$settings = $this->_default_settings($settings);
 
 		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y') {
+		if ($settings['multi'] != 'y')
+		{
 			return $data;
 		}
 
 		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
-		if (empty($tagdata)) {
+		if (empty($tagdata))
+		{
 			$categories = array();
 
 			foreach ($data as $array) {
@@ -317,7 +336,8 @@ class Wb_category_select_ft extends EE_Fieldtype
 		}
 
 		// pre_process() fallback for Matrix
-		if (is_string($data)) {
+		if (is_string($data))
+		{
 			$data = $this->pre_process($data);
 		}
 
@@ -326,7 +346,8 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$parsed = $this->EE->TMPL->parse_variables($tagdata, $data);
 
 		// backspace= param
-		if (isset($params['backspace']) && $params['backspace']) {
+		if (isset($params['backspace']) && $params['backspace'])
+		{
 			$parsed = substr($parsed, 0, -$params['backspace']);
 		}
 
