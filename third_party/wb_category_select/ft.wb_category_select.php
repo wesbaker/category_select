@@ -281,6 +281,22 @@ class Wb_category_select_ft extends EE_Fieldtype
 		return $this->save($data);
 	}
 
+	/**
+	 * Validate Matrix Cell
+	 */
+	function validate_cell($data)
+	{
+	    if ($this->settings['col_required'] == 'y')
+	    {
+	        if (!$data)
+	        {
+	            return lang('col_required');
+	        }
+	    }
+
+	    return TRUE;
+	}
+
 	// Tags --------------------------------------------------------------------
 
 	/**
