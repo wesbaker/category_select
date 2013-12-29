@@ -24,7 +24,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	function Wb_category_select_ft()
 	{
-		parent::EE_Fieldtype();
+		EE_Fieldtype::__construct();
 	}
 
 	// Settings --------------------------------------------------------------------

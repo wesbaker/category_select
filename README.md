@@ -22,6 +22,10 @@ Field Options
 Change Log
 ----------
 
+- 1.3.5
+  - Category lists can show only parents
+  - Added Matrix cell validation
+  - Fixed a deprecated warning for the field type constructor
 - 1.3.4
 	- Fixed a bug where a warning would appear with Better Workflow.
 - 1.3.3
