@@ -281,15 +281,15 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	function validate_cell($data)
 	{
-	    if ($this->settings['col_required'] == 'y')
-	    {
-	        if (!$data)
-	        {
-	            return lang('col_required');
-	        }
-	    }
+		if ($this->settings['col_required'] == 'y')
+		{
+			if (!$data)
+			{
+				return lang('col_required');
+			}
+		}
 
-	    return TRUE;
+		return TRUE;
 	}
 
 	// Tags --------------------------------------------------------------------
