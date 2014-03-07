@@ -301,16 +301,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	function pre_process($data)
 	{
-		// Establish Settings
-		$settings = (isset($this->settings['wb_category_select'])) ? $this->settings['wb_category_select'] : $this->settings;
-		$settings = $this->_default_settings($settings);
-
-		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y')
-		{
-			return $data;
-		}
-
 		return (is_string($data)) ? explode("\n", $data) : $data;
 	}
 
@@ -327,16 +317,11 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$settings = (isset($this->settings['wb_category_select'])) ? $this->settings['wb_category_select'] : $this->settings;
 		$settings = $this->_default_settings($settings);
 
-		// if multiple selections aren't allowed, just return the cat ID
-		if ($settings['multi'] != 'y')
-		{
-			return $data;
-		}
-
-		// check for tagdata, if no tagdata, spit out a pipe separated list of the category ids
+		// if multiple selections aren't allowed, or if no tagdata, send back
+		// the category ID or piped list
 		if (empty($tagdata))
 		{
-			return implode('|', $data);
+			return is_array($data) ? implode('|', $data) : $data;
 		}
 
 		// pre_process() fallback for Matrix
@@ -345,9 +330,17 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$data = $this->pre_process($data);
 		}
 
+		if (is_string($data))
+		{
+			$data = array($data);
+		}
+
 		// loop through the tag pair for each selected category,
 		// parsing the {category_id} tags
-		$parsed = $this->EE->TMPL->parse_variables($tagdata, $data);
+		$parsed = ee()->TMPL->parse_variables(
+			$tagdata,
+			$this->_get_category_data($data)
+		);
 
 		// backspace= param
 		if (isset($params['backspace']) && $params['backspace'])
@@ -356,6 +349,41 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 
 		return $parsed;
+	}
+
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Given a list of category IDs, returns
+	 * @param  Array $cat_ids Array of category IDs
+	 * @return Array          Array of data read for the parser containing
+	 *                        category IDs, names, and url_titles
+	 */
+	private function _get_category_data($cat_ids)
+	{
+		// Pull in category data and map it
+		ee()->load->model('category_model');
+		$category_query = ee()->db->where_in('cat_id', $cat_ids)
+			->get('categories')
+			->result_array();
+		$category_data = array();
+		foreach ($category_query as $data)
+		{
+			$category_data[$data['cat_id']] = $data;
+		}
+
+		// Create the array for parsing
+		$parse = array();
+		foreach ($cat_ids as $category_id)
+		{
+			$parse[] = array(
+				'category_id'        => $category_id,
+				'category_name'      => $category_data[$category_id]['cat_name'],
+				'category_url_title' => $category_data[$category_id]['cat_url_title']
+			);
+		}
+
+		return $parse;
 	}
 
 }
