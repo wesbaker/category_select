@@ -8,8 +8,7 @@ require_once PATH_THIRD . 'wb_category_select/config.php';
  * @package   WB Category Select
  * @author    Wes Baker <wes@wesbaker.com>
  */
-class Wb_category_select_ft extends EE_Fieldtype
-{
+class Wb_category_select_ft extends EE_Fieldtype {
 
 	var $info = array(
 		'name'		=> WB_CAT_SELECT_NAME,
@@ -29,20 +28,20 @@ class Wb_category_select_ft extends EE_Fieldtype
 	{
 		$data = $this->_default_settings($data);
 
-		$this->EE->lang->loadfile('wb_category_select');
+		ee()->lang->loadfile('wb_category_select');
 
 		// Categories
-		$this->EE->table->add_row(
+		ee()->table->add_row(
 			lang('wb_category_select_groups', 'wb_category_select_groups'),
 			$this->_build_category_checkboxes($data)
 		);
 
 		// Multiple?
-		$this->EE->table->add_row(
+		ee()->table->add_row(
 			lang('wb_category_select_multi', 'wb_category_select_multi'),
 			$this->_build_radios($data)
 		);
-		$this->EE->table->add_row(
+		ee()->table->add_row(
 			lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
 			$this->_build_radios($data, 'show_first_level_only')
 		);
@@ -58,7 +57,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 		$settings = (isset($data['wb_category_select'])) ? $data['wb_category_select'] : array();
 		$settings = $this->_default_settings($settings);
 
-		$this->EE->lang->loadfile('wb_category_select');
+		ee()->lang->loadfile('wb_category_select');
 
 		return array(
 			// Categories
@@ -103,8 +102,8 @@ class Wb_category_select_ft extends EE_Fieldtype
 	private function _build_category_checkboxes($data)
 	{
 		// Get list of category groups
-		$site_id = $this->EE->config->item('site_id');
-		$category_groups = $this->EE->db->select("group_id, group_name")
+		$site_id = ee()->config->item('site_id');
+		$category_groups = ee()->db->select("group_id, group_name")
 			->get_where('category_groups', array("site_id" => $site_id));
 
 		// Build checkbox list
@@ -158,7 +157,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 */
 	function save_settings($settings)
 	{
-		$settings = array_merge($this->EE->input->post('wb_category_select'), $settings);
+		$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
 
 		$settings['field_show_fmt'] = 'n';
 		$settings['field_type'] = 'wb_category_select';
@@ -226,15 +225,15 @@ class Wb_category_select_ft extends EE_Fieldtype
 	private function _build_category_list($settings)
 	{
 		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
-		$site_id = $this->EE->config->item('site_id');
+		$site_id = ee()->config->item('site_id');
 
 		foreach ($settings['category_groups'] as $category_group_id)
 		{
 			// Get Categories based on Category Group
-			$this->EE->load->library('api');
-			$this->EE->api->instantiate('channel_categories');
+			ee()->load->library('api');
+			ee()->api->instantiate('channel_categories');
 
-			$categories = $this->EE->api_channel_categories->category_tree($category_group_id);
+			$categories = ee()->api_channel_categories->category_tree($category_group_id);
 
 			if ( ! empty($categories))
 			{
@@ -322,7 +321,7 @@ class Wb_category_select_ft extends EE_Fieldtype
 	 * the selected category ID. Otherwise, it'll loop through the tag pair,
 	 * parsing the {category_id} single variable tags.
 	 */
-	function replace_tag($data, $params = array(), $tagdata = false)
+	function replace_tag($data, $params = array(), $tagdata = FALSE)
 	{
 		// Establish Settings
 		$settings = (isset($this->settings['wb_category_select'])) ? $this->settings['wb_category_select'] : $this->settings;
