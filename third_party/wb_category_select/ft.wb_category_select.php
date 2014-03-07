@@ -236,12 +236,15 @@ class Wb_category_select_ft extends EE_Fieldtype
 
 			$categories = $this->EE->api_channel_categories->category_tree($category_group_id);
 
-			foreach ($categories as $cat_id => $cat_data)
+			if ( ! empty($categories))
 			{
-				if ($settings['show_first_level_only'] == 'n' || ($settings['show_first_level_only'] == 'y' && $cat_data[5] == 1))
+				foreach ($categories as $cat_id => $cat_data)
 				{
-					$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
-					$options[$cat_data[3]][$cat_id] = $prefix . $cat_data[1];
+					if ($settings['show_first_level_only'] == 'n' || ($settings['show_first_level_only'] == 'y' && $cat_data[5] == 1))
+					{
+						$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
+						$options[$cat_data[3]][$cat_id] = $prefix . $cat_data[1];
+					}
 				}
 			}
 		}
