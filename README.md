@@ -57,6 +57,9 @@ Field Options
 Change Log
 ----------
 
+- 1.5
+  - Added support for category image
+  - Removed old backspace code in lieu of built-in backspace support
 - 1.4
   - Category ID, name, and url_title are avaiable for both multi selections
     and single selections

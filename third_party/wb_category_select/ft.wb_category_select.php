@@ -342,12 +342,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$this->_get_category_data($data)
 		);
 
-		// backspace= param
-		if (isset($params['backspace']) && $params['backspace'])
-		{
-			$parsed = substr($parsed, 0, -$params['backspace']);
-		}
-
 		return $parsed;
 	}
 
@@ -362,7 +356,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	private function _get_category_data($cat_ids)
 	{
 		// Pull in category data and map it
-		ee()->load->model('category_model');
 		$category_query = ee()->db->where_in('cat_id', $cat_ids)
 			->get('categories')
 			->result_array();
@@ -379,7 +372,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$parse[] = array(
 				'category_id'        => $category_id,
 				'category_name'      => $category_data[$category_id]['cat_name'],
-				'category_url_title' => $category_data[$category_id]['cat_url_title']
+				'category_url_title' => $category_data[$category_id]['cat_url_title'],
+				'category_image'     => $category_data[$category_id]['cat_image']
 			);
 		}
 
