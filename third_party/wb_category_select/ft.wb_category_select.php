@@ -342,7 +342,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$this->_get_category_data($data)
 		);
 
-		return $parsed;
+		ee()->load->library('typography');
+		return ee()->typography->parse_file_paths($parsed);
 	}
 
 	// -------------------------------------------------------------------------
