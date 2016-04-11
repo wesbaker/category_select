@@ -375,7 +375,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 				$process = array();
 				foreach ($category_data[$category_id] as $k => $v)
 				{
-					$k = false !== strpos($k,'cat_') ? str_replace('cat_','category_',$k) : 'category_'.$k;
+					$k = (strpos($k,'cat_') !== false) ? str_replace('cat_','category_',$k) : 'category_'.$k;
 					$process[$k] = $v;
 				}
 
