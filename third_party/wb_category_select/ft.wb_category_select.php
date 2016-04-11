@@ -370,12 +370,17 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$parse = array();
 		foreach ($cat_ids as $category_id)
 		{
-			$parse[] = array(
-				'category_id'        => $category_id,
-				'category_name'      => $category_data[$category_id]['cat_name'],
-				'category_url_title' => $category_data[$category_id]['cat_url_title'],
-				'category_image'     => $category_data[$category_id]['cat_image']
-			);
+			if( isset( $category_data[$category_id] ) )
+			{
+				$process = array();
+				foreach ($category_data[$category_id] as $k => $v)
+				{
+					$k = (strpos($k,'cat_') !== false) ? str_replace('cat_','category_',$k) : 'category_'.$k;
+					$process[$k] = $v;
+				}
+
+				$parse[] = $process;
+			}
 		}
 
 		return $parse;
