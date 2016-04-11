@@ -28,8 +28,14 @@ You can also use a variable pair:
 You have access to several variables inside the variable pair:
 
 - `{category_id}`
+- `{category_site_id}`
+- `{category_group_id}`
+- `{category_parent_id}`
 - `{category_name}`
 - `{category_url_title}`
+- `{category_description}`
+- `{category_image}`
+- `{category_order}`
 
 You also have access to one parameter:
 
