@@ -63,6 +63,9 @@ Field Options
 Change Log
 ----------
 
+- 1.6
+  - Added support for category description, category order, category parent ID, category group ID, and category site ID
+  - Prevent PHP notice when category select has no value
 - 1.5
   - Added support for category image
   - Removed old backspace code in lieu of built-in backspace support
