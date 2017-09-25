@@ -45,7 +45,7 @@ Install
 -------
 
 1. Download the repository
-2. Move third\_party/wb\_category\_select to system/users/addons
+2. Move third\_party/wb\_category\_select to expressionengine/third\_party (EE2) or system/users/addons (EE3)
 
 
 Field Options
