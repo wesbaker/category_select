@@ -45,7 +45,7 @@ Install
 -------
 
 1. Download the repository
-2. Move third\_party/wb\_category\_select to expressionengine/third\_party
+2. Move third\_party/wb\_category\_select to expressionengine/third\_party (EE2) or system/users/addons (EE3)
 
 
 Field Options
@@ -63,6 +63,9 @@ Field Options
 Change Log
 ----------
 
+- 2.0 (Onstuimig)
+  - Added EE3 support
+  - Added Grid and Bloqs compatibility
 - 1.6
   - Added support for category description, category order, category parent ID, category group ID, and category site ID
   - Prevent PHP notice when category select has no value

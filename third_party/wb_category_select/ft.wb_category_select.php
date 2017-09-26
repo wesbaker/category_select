@@ -3,7 +3,7 @@
 require_once PATH_THIRD . 'wb_category_select/config.php';
 
 /**
- * Wb Category Select Fieldtype Class for EE2
+ * Wb Category Select Fieldtype Class for EE
  *
  * @package   WB Category Select
  * @author    Wes Baker <wes@wesbaker.com>
@@ -29,22 +29,84 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		$data = $this->_default_settings($data);
 
 		ee()->lang->loadfile('wb_category_select');
+		
+		if ($this->_is_ee2())
+		{
+			// Categories
+			ee()->table->add_row(
+				lang('wb_category_select_groups', 'wb_category_select_groups'),
+				$this->_build_category_checkboxes($data)
+			);
 
-		// Categories
-		ee()->table->add_row(
-			lang('wb_category_select_groups', 'wb_category_select_groups'),
-			$this->_build_category_checkboxes($data)
-		);
+			// Multiple?
+			ee()->table->add_row(
+				lang('wb_category_select_multi', 'wb_category_select_multi'),
+				$this->_build_radios($data)
+			);
+			ee()->table->add_row(
+				lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
+				$this->_build_radios($data, 'show_first_level_only')
+			);
+		}
+		else
+		{
+			// Get list of category groups
+			$site_id = ee()->config->item('site_id');
+			$category_groups = ee()->db->select("group_id, group_name")
+				->get_where('category_groups', array("site_id" => $site_id));
 
-		// Multiple?
-		ee()->table->add_row(
-			lang('wb_category_select_multi', 'wb_category_select_multi'),
-			$this->_build_radios($data)
-		);
-		ee()->table->add_row(
-			lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
-			$this->_build_radios($data, 'show_first_level_only')
-		);
+			// Build checkbox list
+			$category_options = array();
+			foreach ($category_groups->result_array() as $index => $row)
+			{
+				$category_options[$row["group_id"]] = $row["group_name"];
+			}
+			
+			$settings = array(
+				array(
+					'title'	=> 'wb_category_select_groups',
+					'fields' => array(
+						'wb_category_select[category_groups]' => array(
+							'type' => 'checkbox',
+							'choices' => $category_options,
+							'value' => $data['category_groups']
+						)
+					)
+				),
+				array(
+					'title' => 'wb_category_select_multi',
+					'fields' => array(
+						'wb_category_select[multi]' => array(
+							'type' => 'yes_no',
+							'value' => $data['multi']
+						)
+					)
+				),
+				array(
+					'title' => 'wb_category_select_show_first_level_only',
+					'fields' => array(
+						'wb_category_select[show_first_level_only]' => array(
+							'type' => 'yes_no',
+							'value' => $data['show_first_level_only']
+						)
+					)
+				)
+			);
+			
+			
+			if ($this->content_type() == 'grid' || $this->content_type() == 'blocks')
+			{
+				return array('field_options' => $settings);
+			}
+			
+			return array(
+				'wb_category_select' => array(
+					'label'	=> 'field_options',
+					'group' => 'wb_category_select',
+					'settings' => $settings
+				)
+			);
+		}
 	}
 
 	/**
@@ -157,12 +219,19 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	function save_settings($settings)
 	{
-		$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
+		if ($this->_is_ee2())
+		{
+			$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
 
-		$settings['field_show_fmt'] = 'n';
-		$settings['field_type'] = 'wb_category_select';
-
-		return $settings;
+			$settings['field_show_fmt'] = 'n';
+			$settings['field_type'] = 'wb_category_select';
+			
+			return $settings;
+		}
+		else
+		{
+			return $settings['wb_category_select'];
+		}
 	}
 
 	// Display Field --------------------------------------------------------------------
@@ -200,7 +269,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		// Figure out field_name and field_id
 		$field_name = ($cell) ? $this->cell_name : $this->field_name;
 		$field_id = str_replace(array('[', ']'), array('_', ''), $field_name);
-
+		
 		// Build options array
 		$options = $this->_build_category_list($settings);
 
@@ -231,7 +300,14 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		{
 			// Get Categories based on Category Group
 			ee()->load->library('api');
-			ee()->api->instantiate('channel_categories');
+			if ($this->_is_ee2())
+			{
+				ee()->api->instantiate('channel_categories');
+			}
+			else
+			{
+				ee()->legacy_api->instantiate('channel_categories');
+			}
 
 			$categories = ee()->api_channel_categories->category_tree($category_group_id);
 
@@ -345,6 +421,11 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		ee()->load->library('typography');
 		return ee()->typography->parse_file_paths($parsed);
 	}
+	
+	public function accepts_content_type($name)
+	{
+		return ($name == 'channel' || $name == 'grid' || $name == 'blocks/1');
+	}
 
 	// -------------------------------------------------------------------------
 
@@ -384,6 +465,27 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 
 		return $parse;
+	}
+	
+	private function _is_ee2()
+	{
+		if (defined('APP_VER'))
+		{
+			$app_ver = APP_VER;
+		}
+		else
+		{
+			$app_ver = ee()->config->item('app_version');
+		}
+		
+		$ee_version = substr($app_ver, 0, 1);
+		
+		if ($ee_version == 2)
+		{
+			return TRUE;
+		}
+		
+		return FALSE;
 	}
 
 }
