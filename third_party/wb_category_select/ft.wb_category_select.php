@@ -30,7 +30,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 		ee()->lang->loadfile('wb_category_select');
 		
-		if($this->_is_ee2()){
+		if ($this->_is_ee2())
+		{
 			// Categories
 			ee()->table->add_row(
 				lang('wb_category_select_groups', 'wb_category_select_groups'),
@@ -46,7 +47,9 @@ class Wb_category_select_ft extends EE_Fieldtype {
 				lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
 				$this->_build_radios($data, 'show_first_level_only')
 			);
-		}else{
+		}
+		else
+		{
 			// Get list of category groups
 			$site_id = ee()->config->item('site_id');
 			$category_groups = ee()->db->select("group_id, group_name")
@@ -216,14 +219,17 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	function save_settings($settings)
 	{
-		if($this->_is_ee2()){
+		if ($this->_is_ee2())
+		{
 			$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
 
 			$settings['field_show_fmt'] = 'n';
 			$settings['field_type'] = 'wb_category_select';
 			
 			return $settings;
-		}else{
+		}
+		else
+		{
 			return $settings['wb_category_select'];
 		}
 	}
@@ -294,9 +300,12 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		{
 			// Get Categories based on Category Group
 			ee()->load->library('api');
-			if($this->_is_ee2()){
+			if ($this->_is_ee2())
+			{
 				ee()->api->instantiate('channel_categories');
-			}else{
+			}
+			else
+			{
 				ee()->legacy_api->instantiate('channel_categories');
 			}
 
@@ -460,12 +469,21 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	
 	private function _is_ee2()
 	{
-		if(defined('APP_VER')) $app_ver = APP_VER;
-		else $app_ver = ee()->config->item('app_version');
+		if (defined('APP_VER'))
+		{
+			$app_ver = APP_VER;
+		}
+		else
+		{
+			$app_ver = ee()->config->item('app_version');
+		}
+		
 		$ee_version = substr($app_ver, 0, 1);
 		
-		if($ee_version == 2)
+		if ($ee_version == 2)
+		{
 			return TRUE;
+		}
 		
 		return FALSE;
 	}
