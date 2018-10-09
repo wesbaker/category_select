@@ -17,6 +17,19 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 	// enable tag pairs
 	var $has_array_data = TRUE;
+	
+	private $EE2 = FALSE;
+	
+	public function __construct()
+	{
+		parent::__construct();
+		
+		if (defined('APP_VER') && version_compare(APP_VER, '3.0.0', '<'))
+		{
+			$this->EE2 = TRUE;
+		}
+
+	}
 
 	// Settings --------------------------------------------------------------------
 
@@ -30,21 +43,44 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 		ee()->lang->loadfile('wb_category_select');
 
-		// Categories
-		ee()->table->add_row(
-			lang('wb_category_select_groups', 'wb_category_select_groups'),
-			$this->_build_category_checkboxes($data)
-		);
+		if ($this->EE2)
+		{
+			
+			// Categories
+			ee()->table->add_row(
+				lang('wb_category_select_groups', 'wb_category_select_groups'),
+				$this->_build_category_checkboxes($data)
+			);
 
-		// Multiple?
-		ee()->table->add_row(
-			lang('wb_category_select_multi', 'wb_category_select_multi'),
-			$this->_build_radios($data)
-		);
-		ee()->table->add_row(
-			lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
-			$this->_build_radios($data, 'show_first_level_only')
-		);
+			// Multiple?
+			ee()->table->add_row(
+				lang('wb_category_select_multi', 'wb_category_select_multi'),
+				$this->_build_radios($data)
+			);
+			ee()->table->add_row(
+				lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
+				$this->_build_radios($data, 'show_first_level_only')
+			);
+			ee()->table->add_row(
+				lang('wb_category_select_multi_double_panes', 'wb_category_select_multi_double_panes'),
+				$this->_build_radios($data, 'multi_double_panes')
+			);
+			
+		}
+		else
+		{
+			
+			$fields[] = $this->_build_category_checkboxes($data);
+			$fields[] = $this->_build_radios($data);
+			$fields[] = $this->_build_radios($data, 'show_first_level_only');
+			$fields[] = $this->_build_radios($data, 'multi_double_panes');
+			
+			return array('wb_category_select_groups' => array(
+				'label' => 'field_options',
+				'group' => 'wb_category_select',
+				'settings' => $fields,
+			));
+		}
 	}
 
 	/**
@@ -63,16 +99,20 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			// Categories
 			array(
 				lang('wb_category_select_groups'),
-				$this->_build_category_checkboxes($settings)
+				$this->_build_category_checkboxes($settings, 'matrix')
 			),
 			// Multiple?
 			array(
 				lang('wb_category_select_multi'),
-				$this->_build_radios($settings)
+				$this->_build_radios($settings, 'multi', 'matrix')
 			),
 			array(
 				lang('wb_category_select_show_first_level_only', 'wb_category_select_show_first_level_only'),
-				$this->_build_radios($settings, 'show_first_level_only')
+				$this->_build_radios($settings, 'show_first_level_only', 'matrix')
+			),
+			array(
+				lang('wb_category_select_multi_double_panes', 'wb_category_select_multi_double_panes'),
+				$this->_build_radios($settings, 'multi_double_panes', 'matrix')
 			),
 		);
 	}
@@ -88,7 +128,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			array(
 				'category_groups' => array(),
 				'multi' => 'n',
-				'show_first_level_only' => 'n'
+				'show_first_level_only' => 'n',
+				'multi_double_panes' => 'n'
 			),
 			(array) $data
 		);
@@ -99,55 +140,99 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 * @param Array $data Data array from display_settings or display_cell_settings
 	 * @return String String of checkbox fields
 	 */
-	private function _build_category_checkboxes($data)
+	private function _build_category_checkboxes($data, $type='')
 	{
 		// Get list of category groups
 		$site_id = ee()->config->item('site_id');
 		$category_groups = ee()->db->select("group_id, group_name")
 			->get_where('category_groups', array("site_id" => $site_id));
 
-		// Build checkbox list
-		$checkboxes = '';
-		$category_group_settings = $data['category_groups'];
-		foreach ($category_groups->result_array() as $index => $row)
+		if ($this->EE2 || $type=='matrix')
 		{
-			// Determine checked or not
-			$checked = (is_array($category_group_settings)
-				AND is_numeric(array_search($row['group_id'], $category_group_settings))) ? TRUE : FALSE;
+			// Build checkbox list
+			$checkboxes = '';
+			$category_group_settings = $data['category_groups'];
+			foreach ($category_groups->result_array() as $index => $row)
+			{
+				// Determine checked or not
+				$checked = (is_array($category_group_settings)
+					AND is_numeric(array_search($row['group_id'], $category_group_settings))) ? TRUE : FALSE;
 
-			// Build checkbox
-			$checkboxes .= "<p><label>";
-			$checkboxes .= form_checkbox('wb_category_select[category_groups][]', $row["group_id"], $checked);
-			$checkboxes .= " " . $row['group_name'];
-			$checkboxes .= "</label></p>";
+				// Build checkbox
+				$checkboxes .= "<p><label>";
+				$checkboxes .= form_checkbox('wb_category_select[category_groups][]', $row["group_id"], $checked);
+				$checkboxes .= " " . $row['group_name'];
+				$checkboxes .= "</label></p>";
+			}
+
+			return $checkboxes;
 		}
+		else
+		{
+			$cat_groups = array();
+			foreach ($category_groups->result_array() as $index => $row)
+			{
+				$cat_groups[$row["group_id"]] = $row["group_name"];
+			}
 
-		return $checkboxes;
+			return array(
+				'title' => 'wb_category_select_groups',
+				'fields' => array(
+					'wb_category_select[category_groups]' => array(
+						'type' => 'checkbox',
+						'choices' => $cat_groups,
+						'value' => $data['category_groups'],
+					)
+				)
+			);
+			
+		}
+	
 	}
 
 	/**
 	 * Builds a string of yes/no radio buttons
 	 */
-	private function _build_radios($data, $name = 'multi')
+	private function _build_radios($data, $name = 'multi', $type='')
 	{
-		$radio_yes = form_radio(
-			"wb_category_select[{$name}]",
-			'y',
-			($data[$name] == 'y'),
-			"id='wb_category_select_{$name}_y'"
-		);
-		$radio_no = form_radio(
-			"wb_category_select[{$name}]",
-			'n',
-			($data[$name] == 'n'),
-			"id='wb_category_select_{$name}_n'"
-		);
 
-		return $radio_yes
-			. NL . lang('yes', "wb_category_select_{$name}_y")
-			. NBS . NBS . NBS . NBS . NBS . NL
-			. $radio_no
-			. NL . lang('no', "wb_category_select_{$name}_n");
+		if ($this->EE2 || $type=='matrix')
+		{
+
+			$radio_yes = form_radio(
+				"wb_category_select[{$name}]",
+				'y',
+				($data[$name] == 'y'),
+				"id='wb_category_select_{$name}_y'"
+			);
+			$radio_no = form_radio(
+				"wb_category_select[{$name}]",
+				'n',
+				($data[$name] == 'n'),
+				"id='wb_category_select_{$name}_n'"
+			);
+
+			return $radio_yes
+				. NL . lang('yes', "wb_category_select_{$name}_y")
+				. NBS . NBS . NBS . NBS . NBS . NL
+				. $radio_no
+				. NL . lang('no', "wb_category_select_{$name}_n");
+
+		}
+		else
+		{
+			return array(
+				'title' => "wb_category_select_{$name}",
+				//'desc' => 'wb_category_select_groups',
+				'fields' => array(
+					"wb_category_select[{$name}]" => array(
+						'type' => 'yes_no',
+						'value' => $data[$name],
+					)
+				)
+			);
+		}	
+
 	}
 
 	// Save Settings --------------------------------------------------------------------
@@ -157,12 +242,29 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	function save_settings($settings)
 	{
-		$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
+		if ($this->EE2)
+		{
+			$settings = array_merge(ee()->input->post('wb_category_select'), $settings);
+			
+			$settings['field_show_fmt'] = 'n';
+			$settings['field_type'] = 'wb_category_select';
+			
+			return $settings;
+		}
+		else
+		{
 
-		$settings['field_show_fmt'] = 'n';
-		$settings['field_type'] = 'wb_category_select';
+			$wb_category_select = ee()->input->post('wb_category_select');
 
-		return $settings;
+			return array(
+				'category_groups' => $wb_category_select['category_groups'],
+				'multi' => $wb_category_select['multi'],
+				'show_first_level_only' => $wb_category_select['show_first_level_only'],
+				'multi_double_panes' => $wb_category_select['multi_double_panes']
+			);
+			
+		}
+
 	}
 
 	// Display Field --------------------------------------------------------------------
@@ -206,12 +308,17 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 		if ($settings['multi'] == 'y')
 		{
+			if ($settings['multi_double_panes'] == 'y')
+			{
+				$this->_add_js_css($field_id, $cell);
+			}
+			
 			if (is_string($data))
 			{
 				$data = explode("\n", $data);
 			}
 
-			return form_multiselect($field_name . '[]', $options, $data, 'id="' . $field_id . '"');
+			return form_multiselect($field_name . '[]', $options, $data, 'id="' . $field_id . '" class="wb_multi_select" style="width:100%;" size=10');
 		}
 
 		return form_dropdown($field_name, $options, $data, 'id="' . $field_id . '"');
@@ -226,23 +333,35 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		$options = ($settings['multi'] == 'y') ? array() : array('' => '');
 		$site_id = ee()->config->item('site_id');
-
-		foreach ($settings['category_groups'] as $category_group_id)
+		
+		if ($settings['category_groups'])
 		{
-			// Get Categories based on Category Group
-			ee()->load->library('api');
-			ee()->api->instantiate('channel_categories');
-
-			$categories = ee()->api_channel_categories->category_tree($category_group_id);
-
-			if ( ! empty($categories))
+			foreach ($settings['category_groups'] as $category_group_id)
 			{
-				foreach ($categories as $cat_id => $cat_data)
+				// Get Categories based on Category Group
+				ee()->load->library('api');
+				if ($this->EE2)
 				{
-					if ($settings['show_first_level_only'] == 'n' || ($settings['show_first_level_only'] == 'y' && $cat_data[5] == 1))
+					ee()->api->instantiate('channel_categories');
+					$spacer = '&mdash;';
+				}
+				else 
+				{
+					ee()->legacy_api->instantiate('channel_categories');
+					$spacer = '—';
+				}
+
+				$categories = ee()->api_channel_categories->category_tree($category_group_id);
+
+				if ( ! empty($categories))
+				{
+					foreach ($categories as $cat_id => $cat_data)
 					{
-						$prefix = str_repeat('&mdash;', $cat_data[5] - 1);
-						$options[$cat_data[3]][$cat_id] = $prefix . $cat_data[1];
+						if ($settings['show_first_level_only'] == 'n' || ($settings['show_first_level_only'] == 'y' && $cat_data[5] == 1))
+						{
+							$prefix = str_repeat($spacer, $cat_data[5] - 1);
+							$options[$cat_data[3]][$cat_id] = $prefix . $cat_data[1];
+						}
 					}
 				}
 			}
@@ -356,34 +475,99 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	 */
 	private function _get_category_data($cat_ids)
 	{
-		// Pull in category data and map it
-		$category_query = ee()->db->where_in('cat_id', $cat_ids)
-			->get('categories')
-			->result_array();
-		$category_data = array();
-		foreach ($category_query as $data)
-		{
-			$category_data[$data['cat_id']] = $data;
-		}
-
-		// Create the array for parsing
 		$parse = array();
-		foreach ($cat_ids as $category_id)
+		
+		if ($cat_ids) 
 		{
-			if( isset( $category_data[$category_id] ) )
+			// Pull in category data and map it
+			$category_query = ee()->db->where_in('cat_id', $cat_ids)
+				->get('categories')
+				->result_array();
+			$category_data = array();
+			foreach ($category_query as $data)
 			{
-				$process = array();
-				foreach ($category_data[$category_id] as $k => $v)
-				{
-					$k = (strpos($k,'cat_') !== false) ? str_replace('cat_','category_',$k) : 'category_'.$k;
-					$process[$k] = $v;
-				}
+				$category_data[$data['cat_id']] = $data;
+			}
 
-				$parse[] = $process;
+			// Create the array for parsing
+			
+			foreach ($cat_ids as $category_id)
+			{
+				if( isset( $category_data[$category_id] ) )
+				{
+					$process = array();
+					foreach ($category_data[$category_id] as $k => $v)
+					{
+						$k = (strpos($k,'cat_') !== false) ? str_replace('cat_','category_',$k) : 'category_'.$k;
+						$process[$k] = $v;
+					}
+
+
+					$parse[] = $process;
+				}
 			}
 		}
 
 		return $parse;
+	}
+	
+	
+	/**
+	 * Set CP CSS and JS
+	 */
+	private function _add_js_css($field_id, $cell)
+	{
+		if ( ! ee()->session->cache('wb_category_select', 'cp_assets_set'))
+		{
+			$cssPath = PATH_THIRD_THEMES . 'wb_category_select/css/multi-select.css';
+			$cssFileTime = (is_file($cssPath) ? filemtime($cssPath) : uniqid());
+			
+			$css = URL_THIRD_THEMES;
+			$css .= "wb_category_select/css/multi-select.css?v={$cssFileTime}";
+			$cssTag = "<link rel=\"stylesheet\" href=\"{$css}\">";
+			ee()->cp->add_to_head($cssTag);
+
+			$jsPath = PATH_THIRD_THEMES . 'wb_category_select/js/jquery.multi-select.js';
+			$jsFileTime = (is_file($jsPath) ? filemtime($jsPath) : uniqid());
+			
+			$js = URL_THIRD_THEMES;
+			$js .= "wb_category_select/js/jquery.multi-select.js?v={$jsFileTime}";
+			$jsTag = "<script type=\"text/javascript\" src=\"{$js}\"></script>";
+			ee()->cp->add_to_foot($jsTag);
+
+			ee()->cp->add_to_head('
+			<style>
+				.ms-container {width:auto; padding-top:7px; padding-bottom:10px;}
+				.matrix .ms-container {padding:10px;}
+				.ms-container .ms-optgroup-label {padding:10px 0px 6px 5px; font-weight:bold;}
+				.ms-container .ms-selectable li.ms-elem-selectable, .ms-container .ms-selection li.ms-elem-selection {padding: 6px 15px;}
+			</style>
+			');
+			
+			ee()->session->set_cache('wb_category_select', 'cp_assets_set', true);
+		}
+
+		if ($cell)
+		{
+			ee()->cp->add_to_foot('
+			<script type="text/javascript">
+				(function($) {
+					Matrix.bind("wb_category_select", "display", function(cell){ $(this).multiSelect({keepOrder:true}); });	
+				})(jQuery);
+			</script>
+			');
+		}
+		else
+		{
+			ee()->cp->add_to_foot('
+			<script type="text/javascript">
+				(function($) {
+					$("#'.$field_id.'.wb_multi_select").multiSelect({keepOrder:true});
+				})(jQuery);
+			</script>
+			');
+		}
+
 	}
 
 }
