@@ -42,7 +42,9 @@ You also have access to one parameter:
 ## Install
 
 1. Download the repository
-2. Move third\_party/wb\_category\_select to expressionengine/third\_party
+2. Copy the following directories over to your EE install:
+   - `system/user/addons/wb_category_select`
+   - `themes/user/wb_category_select`
 
 ## Field Options
 
