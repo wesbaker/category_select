@@ -1,18 +1,16 @@
-WB Category Select
-==================
+# WB Category Select
 
 Select (dropdown or multiselect) field that shows a list of pre-defined category
 groups and the categories within them.
 
-Usage
------
+## Usage
 
 ### Single Variable
 
 When displaying the field on the front end, you can either use a single
 variable:
 
-  {category_select}
+    {category_select}
 
 Which will either display a single category ID or a piped list (e.g. `1|3|17`)
 depending on whether you allow for multiple selections.
@@ -21,9 +19,9 @@ depending on whether you allow for multiple selections.
 
 You can also use a variable pair:
 
-  {category_select}
-    <option val="{category_id}">{category_name} (<code>{category_url_title}</code>)</option>
-  {/category_select}
+    {category_select}
+        <option val="{category_id}">{category_name} (<code>{category_url_title}</code>)</option>
+    {/category_select}
 
 You have access to several variables inside the variable pair:
 
@@ -41,15 +39,12 @@ You also have access to one parameter:
 
 - backspace
 
-Install
--------
+## Install
 
 1. Download the repository
 2. Move third\_party/wb\_category\_select to expressionengine/third\_party
 
-
-Field Options
--------------
+## Field Options
 
 - Category Groups - Select the field groups you want to show up in the drop down
   field
@@ -59,10 +54,10 @@ Field Options
     `{category_id}` within that or just use a single tag to get a pipe delimited
     list of the category IDs
 
+## Change Log
 
-Change Log
-----------
-
+- 2.0
+  - Updated for EE3+ compatibility (thanks to @ignetic!)
 - 1.6
   - Added support for category description, category order, category parent ID, category group ID, and category site ID
   - Prevent PHP notice when category select has no value
