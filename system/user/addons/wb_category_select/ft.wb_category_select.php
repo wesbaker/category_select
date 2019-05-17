@@ -260,7 +260,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 				'category_groups' => $wb_category_select['category_groups'],
 				'multi' => $wb_category_select['multi'],
 				'show_first_level_only' => $wb_category_select['show_first_level_only'],
-				'multi_double_panes' => $wb_category_select['multi_double_panes']
+				'multi_double_panes' => $wb_category_select['multi_double_panes'],
+				'field_wide' => true
 			);
 			
 		}
@@ -519,28 +520,35 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		if ( ! ee()->session->cache('wb_category_select', 'cp_assets_set'))
 		{
-			$cssPath = PATH_THIRD_THEMES . 'wb_category_select/css/multi-select.css';
+			$cssFile = 'wb_category_select/css/multi.min.css';
+			$jsFile = 'wb_category_select/js/multi.min.js';
+			
+			$cssPath = PATH_THIRD_THEMES . $cssFile;
 			$cssFileTime = (is_file($cssPath) ? filemtime($cssPath) : uniqid());
 			
 			$css = URL_THIRD_THEMES;
-			$css .= "wb_category_select/css/multi-select.css?v={$cssFileTime}";
+			$css .= "{$cssFile}?v={$cssFileTime}";
 			$cssTag = "<link rel=\"stylesheet\" href=\"{$css}\">";
 			ee()->cp->add_to_head($cssTag);
 
-			$jsPath = PATH_THIRD_THEMES . 'wb_category_select/js/jquery.multi-select.js';
+			$jsPath = PATH_THIRD_THEMES . $jsFile;
 			$jsFileTime = (is_file($jsPath) ? filemtime($jsPath) : uniqid());
 			
 			$js = URL_THIRD_THEMES;
-			$js .= "wb_category_select/js/jquery.multi-select.js?v={$jsFileTime}";
+			$js .= "{$jsFile}?v={$jsFileTime}";
 			$jsTag = "<script type=\"text/javascript\" src=\"{$js}\"></script>";
 			ee()->cp->add_to_foot($jsTag);
 
 			ee()->cp->add_to_head('
 			<style>
-				.ms-container {width:auto; padding-top:7px; padding-bottom:10px;}
-				.matrix .ms-container {padding:10px;}
-				.ms-container .ms-optgroup-label {padding:10px 0px 6px 5px; font-weight:bold;}
-				.ms-container .ms-selectable li.ms-elem-selectable, .ms-container .ms-selection li.ms-elem-selection {padding: 6px 15px;}
+				#'.$field_id.'.wb_multi_select { opacity: 0.2; }
+				.multi-wrapper .non-selected-wrapper { background:#fff; }
+				.multi-wrapper .item-group { padding:5px; }
+				.multi-wrapper .item-group .group-label { padding:5px 0 10px 0; font-weight:bold; margin-left: -5px; }
+				.multi-wrapper .item { padding: 7px 10px; border:1px solid #cdcdcd; margin-bottom:10px; }
+				.multi-wrapper .search-input { margin:0 !important; }
+				.multi-wrapper .non-selected-wrapper::-webkit-scrollbar, .multi-wrapper .selected-wrapper::-webkit-scrollbar{background-color:#f1f1f1;width:12px; }
+				.multi-wrapper .non-selected-wrapper::-webkit-scrollbar-thumb, .multi-wrapper .selected-wrapper::-webkit-scrollbar-thumb {background-color: #cfcfcf; border: 3px solid #f1f1f1; -moz-border-radius: 10px; -webkit-border-radius: 10px; border-radius: 10px; }
 			</style>
 			');
 			
@@ -552,7 +560,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			ee()->cp->add_to_foot('
 			<script type="text/javascript">
 				(function($) {
-					Matrix.bind("wb_category_select", "display", function(cell){ $(this).multiSelect({keepOrder:true}); });	
+					Matrix.bind("wb_category_select", "display", function(cell){ $(this).find("select").multi(); });	
 				})(jQuery);
 			</script>
 			');
@@ -562,12 +570,21 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			ee()->cp->add_to_foot('
 			<script type="text/javascript">
 				(function($) {
-					$("#'.$field_id.'.wb_multi_select").multiSelect({keepOrder:true});
+					$("#'.$field_id.'.wb_multi_select").multi();
 				})(jQuery);
 			</script>
 			');
 		}
 
+	}
+	
+	function update($current = '')
+	{
+		if($current == $this->info['version'])
+		{
+			return FALSE;
+		}
+		return TRUE;
 	}
 
 }
