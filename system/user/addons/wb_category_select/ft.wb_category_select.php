@@ -30,6 +30,11 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 
 	}
+	
+	public function accepts_content_type($name)
+	{
+		return ($name == 'channel' || $name == 'grid');
+	}
 
 	// Settings --------------------------------------------------------------------
 
@@ -116,6 +121,23 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			),
 		);
 	}
+	
+	/**
+	 * Display Grid Cell Settings
+	 * @param Array $data Cell settings
+	 * @return Array Multidimensional array of setting name, HTML pairs
+	 */
+	function grid_display_settings($data)
+	{
+		$settings = $this->display_settings($data);
+		$grid_settings = array();
+		foreach ($settings as $value) 
+		{
+			$grid_settings[$value['label']] = $value['settings'];
+		}
+		return $grid_settings;
+	}
+
 
 	/**
 	 * Builds the default settings
@@ -256,17 +278,26 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 			$wb_category_select = ee()->input->post('wb_category_select');
 
-			return array(
+			return array_merge($settings, array(
 				'category_groups' => $wb_category_select['category_groups'],
 				'multi' => $wb_category_select['multi'],
 				'show_first_level_only' => $wb_category_select['show_first_level_only'],
 				'multi_double_panes' => $wb_category_select['multi_double_panes'],
 				'field_wide' => true
-			);
+			));
 			
 		}
 
 	}
+
+	/**
+	 * Save Grid Settings
+	 */
+	function grid_save_settings($data)
+	{
+		return $data['wb_category_select'];
+	}
+	
 
 	// Display Field --------------------------------------------------------------------
 
@@ -287,6 +318,16 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		return $this->_build_field($data, TRUE);
 	}
+
+	/**
+	 * Display Grid Cell
+	 * @param Array $data Cell data
+	 */
+	public function grid_display_field($data)
+	{
+		return $this->_build_field($data, FALSE);
+	}
+
 
 	/**
 	 * Builds the field
