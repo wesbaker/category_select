@@ -278,13 +278,13 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 			$wb_category_select = ee()->input->post('wb_category_select');
 
-			return array_merge($settings, array(
+			return array(
 				'category_groups' => $wb_category_select['category_groups'],
 				'multi' => $wb_category_select['multi'],
 				'show_first_level_only' => $wb_category_select['show_first_level_only'],
 				'multi_double_panes' => $wb_category_select['multi_double_panes'],
 				'field_wide' => true
-			));
+			);
 			
 		}
 
