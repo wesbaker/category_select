@@ -131,7 +131,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	{
 		if ($this->EE2)
 		{
-			
 			// Categories
 			ee()->table->add_row(
 				lang('wb_category_select_groups', 'wb_category_select_groups'),
@@ -188,7 +187,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	/**
 	 * Builds a string of category checkboxes
 	 * @param Array $data Data array from display_settings or display_cell_settings
-	 * @return String String of checkbox fields
+	 * @param String $type Field type
+	 * @return Mixed String of checkbox fields or array with field settings
 	 */
 	private function _build_category_checkboxes($data, $type='')
 	{
@@ -234,10 +234,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 						'value' => $data['category_groups'],
 					)
 				)
-			);
-			
+			);	
 		}
-	
 	}
 
 	/**
@@ -258,7 +256,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 			$radio_no = form_radio(
 				"wb_category_select[{$name}]",
 				'n',
-				(!isset($data[$name]) || $data[$name] == 'n'),
+				(isset($data[$name]) ? $data[$name] == 'n' : false),
 				"id='wb_category_select_{$name}_n'"
 			);
 
@@ -273,7 +271,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		{
 			return array(
 				'title' => "wb_category_select_{$name}",
-				//'desc' => 'wb_category_select_groups',
 				'fields' => array(
 					"wb_category_select[{$name}]" => array(
 						'type' => 'yes_no',
@@ -289,6 +286,8 @@ class Wb_category_select_ft extends EE_Fieldtype {
 
 	/**
 	 * Save Field Settings
+	 * @param Array $settings Field settings
+	 * @return Array Multidimensional array of Field setting
 	 */
 	function save_settings($settings)
 	{
@@ -303,7 +302,6 @@ class Wb_category_select_ft extends EE_Fieldtype {
 		}
 		else
 		{
-
 			$wb_category_select = ee()->input->post('wb_category_select');
 
 			return array_merge($settings['wb_category_select'], array(
@@ -313,13 +311,12 @@ class Wb_category_select_ft extends EE_Fieldtype {
 				'multi_double_panes' => $wb_category_select['multi_double_panes'],
 				'field_wide' => true
 			));
-			
 		}
-
 	}
 
 	/**
 	 * Save Grid Settings
+	 * @param Array $data Cell data
 	 */
 	function grid_save_settings($data)
 	{
@@ -360,7 +357,7 @@ class Wb_category_select_ft extends EE_Fieldtype {
 	/**
 	 * Builds the field
 	 * @param Array $data Field data
-	 * @param Boolean $cell TRUE if the field is for a Matrix Cell, FALSE otherwise
+	 * @param Mixed $cell 'matrix' if the field is for a Matrix Cell, 'grid' for a Grid cell, FALSE otherwise
 	 * @return String The dropdown for the category select
 	 */
 	private function _build_field($data, $cell = FALSE)
