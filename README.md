@@ -58,7 +58,9 @@ You also have access to one parameter:
 
 ## Change Log
 
-- 2.0
+- 2.0.1
+  - Fixed issues with matrix and grid fields on EE2 and where categories weren't saving within newly created fields in EE3+
+- 2.0.0
   - Updated for EE3+ compatibility (thanks to @ignetic!)
 - 1.6
   - Added support for category description, category order, category parent ID, category group ID, and category site ID
@@ -76,7 +78,7 @@ You also have access to one parameter:
 - 1.3.4
   - Fixed a bug where a warning would appear with Better Workflow.
 - 1.3.3
-  - Loosened up the $tagdata check when using the tag
+  - Loosened up the \$tagdata check when using the tag
 - 1.3.2
   - Removed unneeded constructor that was also causing deprecation notices
 - 1.3
